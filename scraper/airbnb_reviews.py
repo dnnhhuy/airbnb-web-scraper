@@ -40,8 +40,9 @@ class AirbnbReview():
         
         for review in reviews:
             reviewer_name = review.find_element(by=By.CSS_SELECTOR, value='h3[class^="hpipapi"]').text
-            review_date = review.find_elements(by=By.CSS_SELECTOR, value='li[class="_1f1oir5"]')
-            if len(review_date) == 0:
+            try:
+                review_date = review.find_element(by=By.CSS_SELECTOR, value='li[class="_1f1oir5"]').text
+            except:
                 review_date = review.find_element(By.CSS_SELECTOR, value='div[class^="s1joulhb"]').text.split('\n')[-1]
                 if 'day' in review_date:
                     days = review_date.split(' ')[0]
@@ -52,8 +53,7 @@ class AirbnbReview():
                 elif 'month' in review_date:
                     month = review_date.split(' ')[0]
                     review_date = (date.today() - timedelta(month=int(month))).strftime("%B %Y")
-            else:
-                review_date = review_date[0].text
+                    
             comment = review.find_element(by=By.CSS_SELECTOR, value='span[class^="ll4r2nl"]').text
             results.append([reviewer_name, review_date, comment])
         return results
