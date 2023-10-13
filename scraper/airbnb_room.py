@@ -9,8 +9,7 @@ from scraper.airbnb_host import AirbnbHost
 class AirbnbRoom():
     def __init__(self, driver: WebDriver) -> None:
         self.driver = driver
-        # self.rooms_list = self.get_rooms_list()
-        self.get_room_detail('www.airbnb.com/rooms/14128504?adults=1&category_tag=Tag%3A8678&children=0&enable_m3_private_room=true&infants=0&pets=0&photo_id=1594544502&search_mode=flex_destinations_search&check_in=2023-10-26&check_out=2023-10-31&source_impression_id=p3_1697183059_BCnPIi6Hcu%2Fibp8z&previous_page_section_name=1000')
+        self.rooms_list = self.get_rooms_list()
 
     def get_rooms_list(self):
         collections = []
@@ -23,9 +22,7 @@ class AirbnbRoom():
                 name = item.find_element(by=By.CSS_SELECTOR, value='meta[itemprop="name"]').get_attribute('content')
                 listing_url = item.find_element(by=By.CSS_SELECTOR, value='meta[itemprop="url"]').get_attribute('content')
                 picture_url = item.find_element(by=By.CSS_SELECTOR, value='div[role="presentation"]').find_element(by=By.TAG_NAME, value='img').get_attribute('src')
-                print(picture_url)
-                # self.get_host_info()
-                # self.get_room_detail(listing_url)
+                self.get_room_detail(listing_url)
                 
             try:
                 next_btn = self.driver.find_element(by=By.CSS_SELECTOR, value='a[aria-label="Next"]')
@@ -47,7 +44,7 @@ class AirbnbRoom():
             EC.element_to_be_clickable((By.XPATH, '//button[contains(text(), "Show all")]'))
         )
         show_all_btn.click()
-        time.sleep(3)
+        time.sleep(2)
         amenities_elements = self.driver.find_elements(by=By.CSS_SELECTOR, value='div[class^="twad414"]')
         for amenity in amenities_elements:
             if 'Unavailable' not in amenity.text:
@@ -70,8 +67,8 @@ class AirbnbRoom():
         except:
             print('There is no notification to close')
 
-        # name = self.driver.find_element(by=By.TAG_NAME, value='h1').text
-        # description = self.get_room_description()
+        name = self.driver.find_element(by=By.TAG_NAME, value='h1').text
+        description = self.get_room_description()
         
         
         try:
@@ -113,19 +110,19 @@ class AirbnbRoom():
         results = []
         
         try:
-            review_section = self.driver.find_elements(by=By.CSS_SELECTOR, value='div[data-section-id="REVIEWS_DEFAULT"]')
             review_show_all_btn = WebDriverWait(self.driver, 10).until(
-                EC.element_to_be_clickable((By.CSS_SELECTOR, 'button[data-testid="pdp-show-all-reviews-button"]'))
+                EC.element_to_be_clickable((By.XPATH, '//div[@data-section-id="REVIEWS_DEFAULT"]//button[1]'))
             )
             review_show_all_btn.click()
             reviews_popup = WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, 'div[data-testid="modal-container"]'))
+            EC.presence_of_element_located((By.CSS_SELECTOR, 'div[data-testid="modal-container"]'))
             )
             reviews = AirbnbReview(self.driver, reviews_popup)
             review_score_rating, number_of_reviews, review_score_cleanliness, review_score_communication, review_score_checkin, review_score_accuracy, review_score_location, review_score_value =reviews.get_review_score()
-            results = reviews.get_reviews(number_of_reviews)
+            review_comments = reviews.get_reviews(number_of_reviews)
+            close_btn = reviews_popup.find_element(by=By.CSS_SELECTOR, value='button[aria-label="Close"]')
+            close_btn.click()
         except:
-            
             print('There is no review yet')
     
     def get_host_info(self):
@@ -163,6 +160,7 @@ class AirbnbRoom():
         hosting_time = host_detail.get_hosting_time()
         host_picture_url = host_detail.get_host_picture_url()
         host_identity_verified = host_detail.check_host_identity_verified()
+        print(host_name, host_about, host_is_superhost, host_listings_count, host_review_score, host_number_of_reviews, hosting_time, host_picture_url, host_identity_verified)
             
         self.driver.close()
         self.driver.switch_to.window(self.driver.window_handles[1])

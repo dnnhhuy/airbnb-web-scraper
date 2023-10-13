@@ -30,7 +30,7 @@ class AirbnbReview():
         return review_score_rating, number_of_reviews, review_score_cleanliness, review_score_communication, review_score_checkin, review_score_accuracy, review_score_location, review_score_value
     
     def get_reviews(self, number_of_reviews):
-        results = []
+        review_comments = []
         reviews_section = self.review_popup.find_element(by=By.CSS_SELECTOR, value='div[data-testid="pdp-reviews-modal-scrollable-panel"]')
         reviews = reviews_section.find_elements(by=By.CSS_SELECTOR, value='div[class^="r1are2x1"]')
         # Get total number of reviews
@@ -55,5 +55,5 @@ class AirbnbReview():
                     review_date = (date.today() - timedelta(month=int(month))).strftime("%B %Y")
                     
             comment = review.find_element(by=By.CSS_SELECTOR, value='span[class^="ll4r2nl"]').text
-            results.append([reviewer_name, review_date, comment])
-        return results
+            review_comments.append([reviewer_name, review_date, comment])
+        return review_comments
