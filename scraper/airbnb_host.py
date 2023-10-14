@@ -24,10 +24,10 @@ class AirbnbHost():
         return host_about
     
     def check_superhost(self):
-        host_is_superhost = self.driver.find_element(by=By.CSS_SELECTOR, value='span[class^="s14m4l2n"]').text
-        if host_is_superhost == 'Superhost':
+        try:
+            self.driver.find_element(by=By.XPATH, value='//span[text()="Superhost"]').text
             return True
-        else:
+        except:
             return False
         
     def get_host_listings_count(self):
@@ -57,10 +57,10 @@ class AirbnbHost():
     def get_host_picture_url(self):
         host_picture_url = self.driver.find_element(by=By.XPATH, value='//div[@role="img"][contains(@aria-label, "User Profile")]/picture/img').get_attribute('src')
         return host_picture_url
+    
     def check_host_identity_verified(self):
-        confirmed_section = self.driver.find_element(by=By.CSS_SELECTOR, value='div[class^="vz9l9w5"]')
         try:
-            confirmed_section.find_element(by=By.XPATH, value='//*[text()="Identity"]')
+            self.driver.find_element(by=By.XPATH, value='//h2/span[contains(text(), "confirmed information")]/../../../..//*[text()="Identity"]').text
             return True
         except:
             return False

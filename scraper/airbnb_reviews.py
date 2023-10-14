@@ -1,5 +1,7 @@
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.remote.webdriver import WebDriver
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from datetime import date, timedelta
 class AirbnbReview():
@@ -31,13 +33,14 @@ class AirbnbReview():
     
     def get_reviews(self, number_of_reviews):
         review_comments = []
-        reviews_section = self.review_popup.find_element(by=By.CSS_SELECTOR, value='div[data-testid="pdp-reviews-modal-scrollable-panel"]')
-        reviews = reviews_section.find_elements(by=By.CSS_SELECTOR, value='div[class^="r1are2x1"]')
+        reviews = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_all_elements_located((By.XPATH, '//div[@data-testid="pdp-reviews-modal-scrollable-panel"]//div[starts-with(@class,"r1are2x1")]'))
+        )
         # Get total number of reviews
         while len(reviews) < int(number_of_reviews):
             self.driver.execute_script("arguments[0].scrollIntoView();", reviews[-1])
-            reviews = reviews_section.find_elements(by=By.CSS_SELECTOR, value='div[class^="r1are2x1"]')
-        
+            reviews = self.review_popup.find_elements(by=By.XPATH, value='//div[@data-testid="pdp-reviews-modal-scrollable-panel"]//div[starts-with(@class,"r1are2x1")]')
+            
         for review in reviews:
             reviewer_name = review.find_element(by=By.CSS_SELECTOR, value='h3[class^="hpipapi"]').text
             try:

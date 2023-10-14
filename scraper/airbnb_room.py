@@ -9,7 +9,8 @@ from scraper.airbnb_host import AirbnbHost
 class AirbnbRoom():
     def __init__(self, driver: WebDriver) -> None:
         self.driver = driver
-        self.rooms_list = self.get_rooms_list()
+        # self.rooms_list = self.get_rooms_list()
+        self.room = self.get_room_detail('www.airbnb.com/rooms/13903824?adults=1&category_tag=Tag%3A8678&children=0&enable_m3_private_room=true&infants=0&pets=0&photo_id=1620494697&search_mode=flex_destinations_search&check_in=2023-11-06&check_out=2023-11-11&source_impression_id=p3_1697270490_W6YbcPXY%2B3TW%2FEHZ&previous_page_section_name=1000')
 
     def get_rooms_list(self):
         collections = []
@@ -33,8 +34,9 @@ class AirbnbRoom():
 
 
     def get_room_description(self):
-        description_section = self.driver.find_element(by=By.CSS_SELECTOR, value='div[data-section-id="DESCRIPTION_DEFAULT"]')
-        description = description_section.find_element(by=By.XPATH, value='//div[@data-section-id="DESCRIPTION_DEFAULT"]/div[1]/div/span/span').get_attribute('innerHTML').strip()
+        description = WebDriverWait(self.driver, 10).until( 
+            EC.visibility_of_element_located((By.XPATH, '//div[@data-section-id="DESCRIPTION_DEFAULT"]//span[starts-with(@class, "ll4r2nl")]'))
+        ).get_attribute('innerHTML').strip()
         description = remove_html_tags(description)
         return description       
     
@@ -44,8 +46,10 @@ class AirbnbRoom():
             EC.element_to_be_clickable((By.XPATH, '//button[contains(text(), "Show all")]'))
         )
         show_all_btn.click()
-        time.sleep(2)
-        amenities_elements = self.driver.find_elements(by=By.CSS_SELECTOR, value='div[class^="twad414"]')
+        amenities_elements = WebDriverWait(self.driver, 10).until(
+            EC.visibility_of_all_elements_located((By.CSS_SELECTOR, 'div[class^="twad414"]'))
+        )
+        # self.driver.find_elements(by=By.CSS_SELECTOR, value='div[class^="twad414"]')
         for amenity in amenities_elements:
             if 'Unavailable' not in amenity.text:
                 amenities.append(amenity)
@@ -69,15 +73,12 @@ class AirbnbRoom():
 
         name = self.driver.find_element(by=By.TAG_NAME, value='h1').text
         description = self.get_room_description()
-        
-        
         try:
             overview_section = self.driver.find_element(by=By.XPATH, value='//div[contains(@data-section-id, "OVERVIEW_DEFAULT")]')
             overviews = overview_section.find_element(by=By.TAG_NAME, value='ol').text.strip().split('·')
         except:
             overview_section = self.driver.find_element(by=By.XPATH, value='//div[@data-section-id="LISTING_INFO"]')
             overviews = overview_section.find_element(by=By.CSS_SELECTOR, value='ul').text
-        print(overviews)
         accommodates = ''
         bathrooms = ''
         bedrooms = ''
@@ -92,6 +93,7 @@ class AirbnbRoom():
             if 'bathroom' in overview:
                 bathrooms = overview      
         amenities = self.get_amenities()
+        print(amenities)
         price = self.driver.find_element(by=By.XPATH, value='//*[contains(text(), "per night")]').get_attribute('innerHTML').strip()
         self.get_room_review()
         self.get_host_info()
@@ -109,21 +111,21 @@ class AirbnbRoom():
         review_score_value = ''
         results = []
         
-        try:
-            review_show_all_btn = WebDriverWait(self.driver, 10).until(
-                EC.element_to_be_clickable((By.XPATH, '//div[@data-section-id="REVIEWS_DEFAULT"]//button[1]'))
-            )
-            review_show_all_btn.click()
-            reviews_popup = WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, 'div[data-testid="modal-container"]'))
-            )
-            reviews = AirbnbReview(self.driver, reviews_popup)
-            review_score_rating, number_of_reviews, review_score_cleanliness, review_score_communication, review_score_checkin, review_score_accuracy, review_score_location, review_score_value =reviews.get_review_score()
-            review_comments = reviews.get_reviews(number_of_reviews)
-            close_btn = reviews_popup.find_element(by=By.CSS_SELECTOR, value='button[aria-label="Close"]')
-            close_btn.click()
-        except:
-            print('There is no review yet')
+        # try:
+        review_show_all_btn = WebDriverWait(self.driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH, '//div[@data-section-id="REVIEWS_DEFAULT"]//button[1]'))
+        )
+        review_show_all_btn.click()
+        reviews_popup = WebDriverWait(self.driver, 10).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, 'div[data-testid="modal-container"]'))
+        )
+        reviews = AirbnbReview(self.driver, reviews_popup)
+        review_score_rating, number_of_reviews, review_score_cleanliness, review_score_communication, review_score_checkin, review_score_accuracy, review_score_location, review_score_value =reviews.get_review_score()
+        review_comments = reviews.get_reviews(number_of_reviews)
+        close_btn = reviews_popup.find_element(by=By.CSS_SELECTOR, value='button[aria-label="Close"]')
+        close_btn.click()
+        # except:
+        #     print('There is no review yet')
     
     def get_host_info(self):
         try:
