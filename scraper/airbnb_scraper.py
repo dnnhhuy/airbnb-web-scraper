@@ -31,8 +31,9 @@ class Airbnb(webdriver.Chrome):
             EC.visibility_of_element_located((By.ID, "bigsearch-query-location-input"))
         )
         search_field.send_keys(destination)
-        time.sleep(5)
-        first_result = self.find_element(by=By.ID, value="bigsearch-query-location-suggestion-0")
+        first_result = WebDriverWait(self, 10).until(
+            EC.visibility_of_element_located((By.ID, "bigsearch-query-location-suggestion-0"))
+        )
         first_result.click()
     
     ## mm/dd/yyyy

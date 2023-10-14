@@ -10,25 +10,39 @@ class AirbnbReview():
         self.review_popup = reviews_popup
     
     def get_review_score(self):
+        review_score_rating = ''
+        number_of_reviews = ''
+        review_score_cleanliness = ''
+        review_score_communication = ''
+        review_score_checkin = ''
+        review_score_accuracy = ''
+        review_score_location = ''
+        review_score_value = ''
         try:
             review_score_rating = self.review_popup.find_element(by=By.CLASS_NAME, value='_1hiur72m').get_attribute('innerHTML').strip()
             number_of_reviews = self.review_popup.find_element(by=By.CLASS_NAME, value='_il5oc7').get_attribute('innerHTML').strip().split(' ')[0]
-            review_score_cleanliness = self.review_popup.find_element(by=By.XPATH, value='//div[text()="Cleanliness"]/../following-sibling::div[contains(@class, "v1kb7fro")]').text
-            review_score_communication = self.review_popup.find_element(by=By.XPATH, value='//div[text()="Communication"]/../following-sibling::div[contains(@class, "v1kb7fro")]').text
-            review_score_checkin = self.review_popup.find_element(by=By.XPATH, value='//div[text()="Check-in"]/../following-sibling::div[contains(@class, "v1kb7fro")]').text
-            review_score_accuracy = self.review_popup.find_element(by=By.XPATH, value='//div[text()="Accuracy"]/../following-sibling::div[contains(@class, "v1kb7fro")]').text
-            review_score_location = self.review_popup.find_element(by=By.XPATH, value='//div[text()="Location"]/../following-sibling::div[contains(@class, "v1kb7fro")]').text
-            review_score_value = self.review_popup.find_element(by=By.XPATH, value='//div[text()="Value"]/../following-sibling::div[contains(@class, "v1kb7fro")]').text
+            try:
+                review_score_cleanliness = self.review_popup.find_element(by=By.XPATH, value='//div[text()="Cleanliness"]/../following-sibling::div[contains(@class, "v1kb7fro")]').text
+                review_score_communication = self.review_popup.find_element(by=By.XPATH, value='//div[text()="Communication"]/../following-sibling::div[contains(@class, "v1kb7fro")]').text
+                review_score_checkin = self.review_popup.find_element(by=By.XPATH, value='//div[text()="Check-in"]/../following-sibling::div[contains(@class, "v1kb7fro")]').text
+                review_score_accuracy = self.review_popup.find_element(by=By.XPATH, value='//div[text()="Accuracy"]/../following-sibling::div[contains(@class, "v1kb7fro")]').text
+                review_score_location = self.review_popup.find_element(by=By.XPATH, value='//div[text()="Location"]/../following-sibling::div[contains(@class, "v1kb7fro")]').text
+                review_score_value = self.review_popup.find_element(by=By.XPATH, value='//div[text()="Value"]/../following-sibling::div[contains(@class, "v1kb7fro")]').text
+            except:
+                print("There is no sub review scores")
         except:
             review_stats = self.review_popup.find_element(by=By.CSS_SELECTOR, value='div[class="_19wpxkk"]')
             review_score_rating, number_of_reviews = review_stats.text.split('·')
             number_of_reviews = number_of_reviews.split(' ')[1]
-            review_score_cleanliness = self.review_popup.find_element(by=By.XPATH, value='//div[text()="Cleanliness"]//following-sibling::div/descendant::span[@class="_n9tijb"]').text
-            review_score_communication = self.review_popup.find_element(by=By.XPATH, value='//div[text()="Communication"]//following-sibling::div/descendant::span[@class="_n9tijb"]').text
-            review_score_checkin = self.review_popup.find_element(by=By.XPATH, value='//div[text()="Check-in"]//following-sibling::div/descendant::span[@class="_n9tijb"]').text
-            review_score_accuracy = self.review_popup.find_element(by=By.XPATH, value='//div[text()="Accuracy"]//following-sibling::div/descendant::span[@class="_n9tijb"]').text
-            review_score_location = self.review_popup.find_element(by=By.XPATH, value='//div[text()="Location"]//following-sibling::div/descendant::span[@class="_n9tijb"]').text
-            review_score_value = self.review_popup.find_element(by=By.XPATH, value='//div[text()="Value"]//following-sibling::div/descendant::span[@class="_n9tijb"]').text
+            try:    
+                review_score_cleanliness = self.review_popup.find_element(by=By.XPATH, value='//div[text()="Cleanliness"]//following-sibling::div/descendant::span[@class="_n9tijb"]').text
+                review_score_communication = self.review_popup.find_element(by=By.XPATH, value='//div[text()="Communication"]//following-sibling::div/descendant::span[@class="_n9tijb"]').text
+                review_score_checkin = self.review_popup.find_element(by=By.XPATH, value='//div[text()="Check-in"]//following-sibling::div/descendant::span[@class="_n9tijb"]').text
+                review_score_accuracy = self.review_popup.find_element(by=By.XPATH, value='//div[text()="Accuracy"]//following-sibling::div/descendant::span[@class="_n9tijb"]').text
+                review_score_location = self.review_popup.find_element(by=By.XPATH, value='//div[text()="Location"]//following-sibling::div/descendant::span[@class="_n9tijb"]').text
+                review_score_value = self.review_popup.find_element(by=By.XPATH, value='//div[text()="Value"]//following-sibling::div/descendant::span[@class="_n9tijb"]').text
+            except:
+                print("There is no sub review scores")
         return review_score_rating, number_of_reviews, review_score_cleanliness, review_score_communication, review_score_checkin, review_score_accuracy, review_score_location, review_score_value
     
     def get_reviews(self, number_of_reviews):

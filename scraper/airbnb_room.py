@@ -10,7 +10,7 @@ class AirbnbRoom():
     def __init__(self, driver: WebDriver) -> None:
         self.driver = driver
         # self.rooms_list = self.get_rooms_list()
-        self.room = self.get_room_detail('www.airbnb.com/rooms/13903824?adults=1&category_tag=Tag%3A8678&children=0&enable_m3_private_room=true&infants=0&pets=0&photo_id=1620494697&search_mode=flex_destinations_search&check_in=2023-11-06&check_out=2023-11-11&source_impression_id=p3_1697270490_W6YbcPXY%2B3TW%2FEHZ&previous_page_section_name=1000')
+        self.room = self.get_room_detail('www.airbnb.com/rooms/966487164949434955?category_tag=Tag%3A8678&enable_m3_private_room=true&photo_id=1742774498&check_in=2023-10-18&check_out=2023-10-21&source_impression_id=p3_1697309781_VOjWBkmudNe1BbOO&previous_page_section_name=1000&federated_search_id=c07b8219-e1dc-45df-83f4-48b788ae2787')
 
     def get_rooms_list(self):
         collections = []
@@ -49,10 +49,9 @@ class AirbnbRoom():
         amenities_elements = WebDriverWait(self.driver, 10).until(
             EC.visibility_of_all_elements_located((By.CSS_SELECTOR, 'div[class^="twad414"]'))
         )
-        # self.driver.find_elements(by=By.CSS_SELECTOR, value='div[class^="twad414"]')
         for amenity in amenities_elements:
             if 'Unavailable' not in amenity.text:
-                amenities.append(amenity)
+                amenities.append(amenity.text)
         close_btn = self.driver.find_element(by=By.CSS_SELECTOR, value='button[aria-label="Close"]')
         close_btn.click()
         return amenities
