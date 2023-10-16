@@ -22,17 +22,20 @@ class Airbnb(webdriver.Chrome):
         self.get(const.BASE_URL)
         
     def select_destination(self, destination):
-        anywhere_btn = WebDriverWait(self, 10).until(
-            EC.visibility_of_element_located((By.XPATH, '//*[text()="Anywhere"]'))
-        )
-        anywhere_btn.click()
+        try:
+            anywhere_btn = WebDriverWait(self, 10).until(
+                EC.visibility_of_element_located((By.XPATH, '//*[text()="Anywhere"]'))
+            )
+            anywhere_btn.click()
+        except:
+            print("There is no anywhere button")
         
         search_field = WebDriverWait(self, 10).until(
             EC.visibility_of_element_located((By.ID, "bigsearch-query-location-input"))
         )
         search_field.send_keys(destination)
         first_result = WebDriverWait(self, 10).until(
-            EC.visibility_of_element_located((By.ID, "bigsearch-query-location-suggestion-0"))
+            EC.element_to_be_clickable((By.ID, "bigsearch-query-location-suggestion-0"))
         )
         first_result.click()
     

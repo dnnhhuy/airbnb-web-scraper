@@ -51,8 +51,12 @@ class AirbnbHost():
         return host_number_of_reviews
     
     def get_hosting_time(self):
-        hosting_time = self.driver.find_element(by=By.XPATH, value='//span[contains(text(),"hosting")]').text
+        try:
+            hosting_time = self.driver.find_element(by=By.XPATH, value='//span[contains(text(),"hosting")]').text
+        except:
+            hosting_time = ''
         return hosting_time
+        
 
     def get_host_picture_url(self):
         host_picture_url = self.driver.find_element(by=By.XPATH, value='//div[@role="img"][contains(@aria-label, "User Profile")]/picture/img').get_attribute('src')
