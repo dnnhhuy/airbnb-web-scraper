@@ -9,9 +9,8 @@ from scraper.airbnb_host import AirbnbHost
 class AirbnbRoom():
     def __init__(self, driver: WebDriver) -> None:
         self.driver = driver
-        # self.rooms_list = self.get_rooms_list()
-        self.room = self.get_room_detail('www.airbnb.com/rooms/963362343095640756?adults=2&check_in=2023-10-18&check_out=2023-10-20&source_impression_id=p3_1697311109_lW8um0e9%2BjVTQftN&previous_page_section_name=1000')
-
+        self.rooms_list = self.get_rooms_list()
+        # self.rooms = self.get_room_detail('www.airbnb.com/rooms/41090507?adults=2&check_in=2023-10-19&check_out=2023-10-21&source_impression_id=p3_1697429985_KuEbik4FKy367vMH&previous_page_section_name=1000')
     def get_rooms_list(self):
         collections = []
         page = 1
@@ -53,8 +52,8 @@ class AirbnbRoom():
             EC.visibility_of_all_elements_located((By.CSS_SELECTOR, 'div[class^="twad414"]'))
         )
         for amenity in amenities_elements:
-            if 'Unavailable' not in amenity.text:
-                amenities.append(amenity.text)
+            if 'Unavailable' not in amenity.get_attribute('innerText'):
+                amenities.append(amenity.get_attribute('innerText'))
         close_btn = self.driver.find_element(by=By.CSS_SELECTOR, value='button[aria-label="Close"]')
         close_btn.click()
         return amenities
@@ -74,14 +73,14 @@ class AirbnbRoom():
         except:
             print('There is no notification to close')
 
-        name = self.driver.find_element(by=By.TAG_NAME, value='h1').text
+        name = self.driver.find_element(by=By.TAG_NAME, value='h1').get_attribute('innerText')
         description = self.get_room_description()
         try:
             overview_section = self.driver.find_element(by=By.XPATH, value='//div[contains(@data-section-id, "OVERVIEW_DEFAULT")]')
-            overviews = overview_section.find_element(by=By.TAG_NAME, value='ol').text.strip().split('·')
+            overviews = overview_section.find_element(by=By.TAG_NAME, value='ol').get_attribute('innerText').strip().split('·')
         except:
             overview_section = self.driver.find_element(by=By.XPATH, value='//div[@data-section-id="LISTING_INFO"]')
-            overviews = overview_section.find_element(by=By.CSS_SELECTOR, value='ul').text
+            overviews = overview_section.find_element(by=By.CSS_SELECTOR, value='ul').get_attribute('innerText')
         accommodates = ''
         bathrooms = ''
         bedrooms = ''
@@ -99,8 +98,8 @@ class AirbnbRoom():
         price = self.driver.find_element(by=By.XPATH, value='//*[contains(text(), "per night")]').get_attribute('innerHTML').strip()
         self.get_room_review()
         self.get_host_info()
-        # self.driver.close()
-        # self.driver.switch_to.window(self.driver.window_handles[0])
+        self.driver.close()
+        self.driver.switch_to.window(self.driver.window_handles[0])
     
     def get_room_review(self):
         review_score_rating = ''
@@ -140,7 +139,7 @@ class AirbnbRoom():
                 reviews.close_reviews_modal(reviews_modal)
             except:
                 review_score_cleanliness, review_score_communication, review_score_checkin, review_score_accuracy, review_score_location, review_score_value = reviews.get_review_score_without_modal(review_section)
-                review_comments = reviews.get_reviews_no_modal(number_of_reviews)
+                review_comments = reviews.get_reviews_without_modal(number_of_reviews)
             
             print(review_score_rating, number_of_reviews, review_score_cleanliness, review_score_communication, review_score_checkin, review_score_accuracy, review_score_location, review_score_value)
             print(review_comments)
@@ -151,14 +150,14 @@ class AirbnbRoom():
         try:
             host_section = self.driver.find_element(by=By.CSS_SELECTOR, value='div[data-section-id="HOST_PROFILE_DEFAULT"]')
             try:
-                host_response_time = host_section.find_element(by=By.XPATH, value='//*[text()="Response time"]').text
+                host_response_time = host_section.find_element(by=By.XPATH, value='//*[text()="Response time"]').get_attribute('innerText')
             except:
                 host_response_time = ''
             try:
-                host_response_rate = host_section.find_element(by=By.XPATH, value='//*[text()="Response rate"]').text
+                host_response_rate = host_section.find_element(by=By.XPATH, value='//*[text()="Response rate"]').get_attribute('innerText')
             except:
                 host_response_rate = ''
-            host_since = host_section.find_element(by=By.CSS_SELECTOR, value='div[class^="s9fngse"]').text
+            host_since = host_section.find_element(by=By.CSS_SELECTOR, value='div[class^="s9fngse"]').get_attribute('innerText')
         except:
             host_section = self.driver.find_element(by=By.CSS_SELECTOR, value='div[data-section-id="MEET_YOUR_HOST"]')
             

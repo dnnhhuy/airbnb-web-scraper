@@ -14,11 +14,11 @@ class AirbnbReview():
         )
         return reviews_modal
 
-    def close_reviews_modal(self, reviews_modal):
+    def close_reviews_modal(self, reviews_modal: WebElement):
         close_btn = reviews_modal.find_element(by=By.CSS_SELECTOR, value='button[aria-label="Close"]')
         close_btn.click()
     
-    def get_review_score(self, reviews_modal):
+    def get_review_score(self, reviews_modal: WebElement):
         review_score_cleanliness = ''
         review_score_communication = ''
         review_score_checkin = ''
@@ -26,25 +26,25 @@ class AirbnbReview():
         review_score_location = ''
         review_score_value = ''
         try:
-            review_score_cleanliness = reviews_modal.find_element(by=By.XPATH, value='//div[text()="Cleanliness"]/../following-sibling::div[contains(@class, "v1kb7fro")]').text
-            review_score_communication = reviews_modal.find_element(by=By.XPATH, value='//div[text()="Communication"]/../following-sibling::div[contains(@class, "v1kb7fro")]').text
-            review_score_checkin = reviews_modal.find_element(by=By.XPATH, value='//div[text()="Check-in"]/../following-sibling::div[contains(@class, "v1kb7fro")]').text
-            review_score_accuracy = reviews_modal.find_element(by=By.XPATH, value='//div[text()="Accuracy"]/../following-sibling::div[contains(@class, "v1kb7fro")]').text
-            review_score_location = reviews_modal.find_element(by=By.XPATH, value='//div[text()="Location"]/../following-sibling::div[contains(@class, "v1kb7fro")]').text
-            review_score_value = reviews_modal.find_element(by=By.XPATH, value='//div[text()="Value"]/../following-sibling::div[contains(@class, "v1kb7fro")]').text
+            review_score_cleanliness = reviews_modal.find_element(by=By.XPATH, value='//div[text()="Cleanliness"]/../following-sibling::div[contains(@class, "v1kb7fro")]').get_attribute('innerText')
+            review_score_communication = reviews_modal.find_element(by=By.XPATH, value='//div[text()="Communication"]/../following-sibling::div[contains(@class, "v1kb7fro")]').get_attribute('innerText')
+            review_score_checkin = reviews_modal.find_element(by=By.XPATH, value='//div[text()="Check-in"]/../following-sibling::div[contains(@class, "v1kb7fro")]').get_attribute('innerText')
+            review_score_accuracy = reviews_modal.find_element(by=By.XPATH, value='//div[text()="Accuracy"]/../following-sibling::div[contains(@class, "v1kb7fro")]').get_attribute('innerText')
+            review_score_location = reviews_modal.find_element(by=By.XPATH, value='//div[text()="Location"]/../following-sibling::div[contains(@class, "v1kb7fro")]').get_attribute('innerText')
+            review_score_value = reviews_modal.find_element(by=By.XPATH, value='//div[text()="Value"]/../following-sibling::div[contains(@class, "v1kb7fro")]').get_attribute('innerText')
         except:
             try: 
-                review_score_cleanliness = reviews_modal.find_element(by=By.XPATH, value='//div[text()="Cleanliness"]//following-sibling::div/descendant::span[@class="_n9tijb"]').text
-                review_score_communication = reviews_modal.find_element(by=By.XPATH, value='//div[text()="Communication"]//following-sibling::div/descendant::span[@class="_n9tijb"]').text
-                review_score_checkin = reviews_modal.find_element(by=By.XPATH, value='//div[text()="Check-in"]//following-sibling::div/descendant::span[@class="_n9tijb"]').text
-                review_score_accuracy = reviews_modal.find_element(by=By.XPATH, value='//div[text()="Accuracy"]//following-sibling::div/descendant::span[@class="_n9tijb"]').text
-                review_score_location = reviews_modal.find_element(by=By.XPATH, value='//div[text()="Location"]//following-sibling::div/descendant::span[@class="_n9tijb"]').text
-                review_score_value = reviews_modal.find_element(by=By.XPATH, value='//div[text()="Value"]//following-sibling::div/descendant::span[@class="_n9tijb"]').text
+                review_score_cleanliness = reviews_modal.find_element(by=By.XPATH, value='//div[text()="Cleanliness"]//following-sibling::div/descendant::span[@class="_n9tijb"]').get_attribute('innerText')
+                review_score_communication = reviews_modal.find_element(by=By.XPATH, value='//div[text()="Communication"]//following-sibling::div/descendant::span[@class="_n9tijb"]').get_attribute('innerText')
+                review_score_checkin = reviews_modal.find_element(by=By.XPATH, value='//div[text()="Check-in"]//following-sibling::div/descendant::span[@class="_n9tijb"]').get_attribute('innerText')
+                review_score_accuracy = reviews_modal.find_element(by=By.XPATH, value='//div[text()="Accuracy"]//following-sibling::div/descendant::span[@class="_n9tijb"]').get_attribute('innerText')
+                review_score_location = reviews_modal.find_element(by=By.XPATH, value='//div[text()="Location"]//following-sibling::div/descendant::span[@class="_n9tijb"]').get_attribute('innerText')
+                review_score_value = reviews_modal.find_element(by=By.XPATH, value='//div[text()="Value"]//following-sibling::div/descendant::span[@class="_n9tijb"]').get_attribute('innerText')
             except:
                 print("There is no sub review scores")
         return review_score_cleanliness, review_score_communication, review_score_checkin, review_score_accuracy, review_score_location, review_score_value
 
-    def get_review_score_without_modal(self, review_section):
+    def get_review_score_without_modal(self, review_section: WebElement):
         review_score_cleanliness = ''
         review_score_communication = ''
         review_score_checkin = ''
@@ -70,7 +70,7 @@ class AirbnbReview():
                 print("This is no sub review scores")
         return review_score_cleanliness, review_score_communication, review_score_checkin, review_score_accuracy, review_score_location, review_score_value
     
-    def get_reviews(self, number_of_reviews, reviews_modal):
+    def get_reviews(self, number_of_reviews, reviews_modal: WebElement):
         review_comments = []
         reviews = WebDriverWait(self.driver, 10).until(
             EC.presence_of_all_elements_located((By.XPATH, '//div[@data-testid="pdp-reviews-modal-scrollable-panel"]//div[starts-with(@class,"r1are2x1")]'))
@@ -81,11 +81,12 @@ class AirbnbReview():
             reviews = reviews_modal.find_elements(by=By.XPATH, value='//div[@data-testid="pdp-reviews-modal-scrollable-panel"]//div[starts-with(@class,"r1are2x1")]')
             
         for review in reviews:
-            reviewer_name = review.find_element(by=By.CSS_SELECTOR, value='h3[class^="hpipapi"]').text
+            reviewer_id = review.find_element(by=By.CSS_SELECTOR, value='a[class^="_9bezani"]').get_attribute('href').split('/')[-1]
+            reviewer_name = review.find_element(by=By.CSS_SELECTOR, value='h3[class^="hpipapi"]').get_attribute('innerText')
             try:
-                review_date = review.find_element(by=By.CSS_SELECTOR, value='li[class="_1f1oir5"]').text
+                review_date = review.find_element(by=By.CSS_SELECTOR, value='li[class="_1f1oir5"]').get_attribute('innerText')
             except:
-                review_date = review.find_element(By.CSS_SELECTOR, value='div[class^="s1joulhb"]').text.split('\n')[-1]
+                review_date = review.find_element(By.CSS_SELECTOR, value='div[class^="s1joulhb"]').get_attribute('innerText').split('\n')[-1]
                 if 'day' in review_date:
                     days = review_date.split(' ')[0]
                     review_date = (date.today() - timedelta(days=int(days))).strftime("%B %Y")
@@ -96,19 +97,20 @@ class AirbnbReview():
                     month = review_date.split(' ')[0]
                     review_date = (date.today() - timedelta(month=int(month))).strftime("%B %Y")
                     
-            comment = review.find_element(by=By.CSS_SELECTOR, value='span[class^="ll4r2nl"]').text
-            review_comments.append([reviewer_name, review_date, comment])
+            comment = review.find_element(by=By.CSS_SELECTOR, value='span[class^="ll4r2nl"]').get_attribute('innerText')
+            review_comments.append([reviewer_id, reviewer_name, review_date, comment])
         return review_comments
 
-    def get_reviews_no_modal(self, number_of_reviews):
+    def get_reviews_without_modal(self, number_of_reviews):
         review_comments = []
         reviews = self.driver.find_elements(by=By.XPATH, value='//div[@data-section-id="REVIEWS_DEFAULT"]//div[@role="list"]//div[@role="listitem"]')
         for review in reviews:
+            reviewer_id = review.find_element(by=By.CSS_SELECTOR, value='a[class^="_9bezani"]').get_attribute('href').split('/')[-1]
             reviewer_name = review.find_element(by=By.CSS_SELECTOR, value='h3[class^="hpipapi"]').get_attribute('innerText')
             try:
-                review_date = review.find_element(by=By.CSS_SELECTOR, value='li[class="_1f1oir5"]').text
+                review_date = review.find_element(by=By.CSS_SELECTOR, value='li[class="_1f1oir5"]').get_attribute('innerText')
             except:
-                review_date = review.find_element(By.CSS_SELECTOR, value='div[class^="s1joulhb"]').text.split('\n')[-1]
+                review_date = review.find_element(By.CSS_SELECTOR, value='div[class^="s1joulhb"]').get_attribute('innerText').split('\n')[-1]
                 if 'day' in review_date:
                     days = review_date.split(' ')[0]
                     review_date = (date.today() - timedelta(days=int(days))).strftime("%B %Y")
@@ -119,6 +121,6 @@ class AirbnbReview():
                     month = review_date.split(' ')[0]
                     review_date = (date.today() - timedelta(month=int(month))).strftime("%B %Y")
             
-            comment = review.find_element(by=By.CSS_SELECTOR, value='span[class^="ll4r2nl"]').text
-            review_comments.append([reviewer_name, review_date, comment])
+            comment = review.find_element(by=By.CSS_SELECTOR, value='span[class^="ll4r2nl"]').get_attribute('innerText')
+            review_comments.append([reviewer_id, reviewer_name, review_date, comment])
         return review_comments

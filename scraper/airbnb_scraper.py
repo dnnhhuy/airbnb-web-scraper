@@ -35,7 +35,7 @@ class Airbnb(webdriver.Chrome):
         )
         search_field.send_keys(destination)
         first_result = WebDriverWait(self, 10).until(
-            EC.element_to_be_clickable((By.ID, "bigsearch-query-location-suggestion-0"))
+            EC.visibility_of_element_located((By.ID, "bigsearch-query-location-suggestion-0"))
         )
         first_result.click()
     
