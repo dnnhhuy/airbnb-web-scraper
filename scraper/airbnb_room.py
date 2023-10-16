@@ -10,7 +10,7 @@ class AirbnbRoom():
     def __init__(self, driver: WebDriver) -> None:
         self.driver = driver
         # self.rooms_list = self.get_rooms_list()
-        self.room = self.get_room_detail('www.airbnb.com/rooms/863921875691552996?adults=2&check_in=2023-10-18&check_out=2023-10-20&source_impression_id=p3_1697352446_T5a2pPBA0VMdX%2FvG&previous_page_section_name=1000&federated_search_id=ad916579-4c7a-42b0-89ad-bedcc00bcf64')
+        self.room = self.get_room_detail('www.airbnb.com/rooms/963362343095640756?adults=2&check_in=2023-10-18&check_out=2023-10-20&source_impression_id=p3_1697311109_lW8um0e9%2BjVTQftN&previous_page_section_name=1000')
 
     def get_rooms_list(self):
         collections = []
@@ -66,7 +66,7 @@ class AirbnbRoom():
         self.driver.get(url=listing_url)
             
         try:
-            translation_dialog = WebDriverWait(self.driver, 10).until(
+            WebDriverWait(self.driver, 10).until(
                 EC.visibility_of_element_located((By.CSS_SELECTOR, 'div[aria-label="Translation on"]'))
             )
             close_btn = self.driver.find_element(By.XPATH, '//div[@aria-label="Translation on"][@role="dialog"]//button[@aria-label="Close"]')
@@ -134,29 +134,14 @@ class AirbnbRoom():
                     EC.element_to_be_clickable((By.XPATH, '//div[@data-section-id="REVIEWS_DEFAULT"]//button[1]'))
                 )
                 review_show_all_btn.click()
-                
-                review_score_cleanliness, review_score_communication, review_score_checkin, review_score_accuracy, review_score_location, review_score_value =reviews.get_review_score()
-                review_comments = reviews.get_reviews(number_of_reviews)
-                reviews.close_reviews_modal()
+                reviews_modal = reviews.get_reviews_modal()
+                review_score_cleanliness, review_score_communication, review_score_checkin, review_score_accuracy, review_score_location, review_score_value = reviews.get_review_score(reviews_modal)
+                review_comments = reviews.get_reviews(number_of_reviews, reviews_modal)
+                reviews.close_reviews_modal(reviews_modal)
             except:
-                try:
-                    review_score_cleanliness = self.driver.find_element(by=By.XPATH, value='//div[@data-section-id="REVIEWS_DEFAULT"]//div[text()="Cleanliness"]//following-sibling::div').get_attribute('innerText')
-                    review_score_communication = self.driver.find_element(by=By.XPATH, value='//div[@data-section-id="REVIEWS_DEFAULT"]//div[text()="Communication"]//following-sibling::div').get_attribute('innerText')
-                    review_score_checkin = self.driver.find_element(by=By.XPATH, value='//div[@data-section-id="REVIEWS_DEFAULT"]//div[text()="Check-in"]//following-sibling::div').get_attribute('innerText')
-                    review_score_accuracy = self.driver.find_element(by=By.XPATH, value='//div[@data-section-id="REVIEWS_DEFAULT"]//div[text()="Accuracy"]//following-sibling::div').get_attribute('innerText')
-                    review_score_location = self.driver.find_element(by=By.XPATH, value='//div[@data-section-id="REVIEWS_DEFAULT"]//div[text()="Location"]//following-sibling::div').get_attribute('innerText')
-                    review_score_value = self.driver.find_element(by=By.XPATH, value='//div[@data-section-id="REVIEWS_DEFAULT"]//div[text()="Value"]//following-sibling::div').get_attribute('innerText')
-                except: 
-                    try:
-                        review_score_cleanliness = review_section.find_element(by=By.XPATH, value='//div[text()="Cleanliness"]//following-sibling::div/span').get_attribute('innerText')
-                        review_score_communication = review_section.find_element(by=By.XPATH, value='//div[text()="Communication"]//following-sibling::div/span').get_attribute('innerText')
-                        review_score_checkin = review_section.find_element(by=By.XPATH, value='//div[text()="Check-in"]//following-sibling::div/span').get_attribute('innerText')
-                        review_score_accuracy = review_section.find_element(by=By.XPATH, value='//div[text()="Accuracy"]//following-sibling::div/span').get_attribute('innerText')
-                        review_score_location = review_section.find_element(by=By.XPATH, value='//div[text()="Location"]//following-sibling::div/span').get_attribute('innerText')
-                        review_score_value = review_section.find_element(by=By.XPATH, value='//div[text()="Value"]//following-sibling::div/span').get_attribute('innerText')
-                    except:
-                        print("This is no sub review scores")
+                review_score_cleanliness, review_score_communication, review_score_checkin, review_score_accuracy, review_score_location, review_score_value = reviews.get_review_score_without_modal(review_section)
                 review_comments = reviews.get_reviews_no_modal(number_of_reviews)
+            
             print(review_score_rating, number_of_reviews, review_score_cleanliness, review_score_communication, review_score_checkin, review_score_accuracy, review_score_location, review_score_value)
             print(review_comments)
             

@@ -14,13 +14,11 @@ class AirbnbReview():
         )
         return reviews_modal
 
-    def close_reviews_modal(self):
-        reviews_modal = self.get_reviews_modal()
+    def close_reviews_modal(self, reviews_modal):
         close_btn = reviews_modal.find_element(by=By.CSS_SELECTOR, value='button[aria-label="Close"]')
         close_btn.click()
     
-    def get_review_score(self):
-        reviews_modal = self.get_reviews_modal()
+    def get_review_score(self, reviews_modal):
         review_score_cleanliness = ''
         review_score_communication = ''
         review_score_checkin = ''
@@ -45,9 +43,34 @@ class AirbnbReview():
             except:
                 print("There is no sub review scores")
         return review_score_cleanliness, review_score_communication, review_score_checkin, review_score_accuracy, review_score_location, review_score_value
+
+    def get_review_score_without_modal(self, review_section):
+        review_score_cleanliness = ''
+        review_score_communication = ''
+        review_score_checkin = ''
+        review_score_accuracy = ''
+        review_score_location = ''
+        review_score_value = ''
+        try:
+            review_score_cleanliness = self.driver.find_element(by=By.XPATH, value='//div[@data-section-id="REVIEWS_DEFAULT"]//div[text()="Cleanliness"]//following-sibling::div').get_attribute('innerText')
+            review_score_communication = self.driver.find_element(by=By.XPATH, value='//div[@data-section-id="REVIEWS_DEFAULT"]//div[text()="Communication"]//following-sibling::div').get_attribute('innerText')
+            review_score_checkin = self.driver.find_element(by=By.XPATH, value='//div[@data-section-id="REVIEWS_DEFAULT"]//div[text()="Check-in"]//following-sibling::div').get_attribute('innerText')
+            review_score_accuracy = self.driver.find_element(by=By.XPATH, value='//div[@data-section-id="REVIEWS_DEFAULT"]//div[text()="Accuracy"]//following-sibling::div').get_attribute('innerText')
+            review_score_location = self.driver.find_element(by=By.XPATH, value='//div[@data-section-id="REVIEWS_DEFAULT"]//div[text()="Location"]//following-sibling::div').get_attribute('innerText')
+            review_score_value = self.driver.find_element(by=By.XPATH, value='//div[@data-section-id="REVIEWS_DEFAULT"]//div[text()="Value"]//following-sibling::div').get_attribute('innerText')
+        except: 
+            try:
+                review_score_cleanliness = review_section.find_element(by=By.XPATH, value='//div[text()="Cleanliness"]//following-sibling::div/span').get_attribute('innerText')
+                review_score_communication = review_section.find_element(by=By.XPATH, value='//div[text()="Communication"]//following-sibling::div/span').get_attribute('innerText')
+                review_score_checkin = review_section.find_element(by=By.XPATH, value='//div[text()="Check-in"]//following-sibling::div/span').get_attribute('innerText')
+                review_score_accuracy = review_section.find_element(by=By.XPATH, value='//div[text()="Accuracy"]//following-sibling::div/span').get_attribute('innerText')
+                review_score_location = review_section.find_element(by=By.XPATH, value='//div[text()="Location"]//following-sibling::div/span').get_attribute('innerText')
+                review_score_value = review_section.find_element(by=By.XPATH, value='//div[text()="Value"]//following-sibling::div/span').get_attribute('innerText')
+            except:
+                print("This is no sub review scores")
+        return review_score_cleanliness, review_score_communication, review_score_checkin, review_score_accuracy, review_score_location, review_score_value
     
-    def get_reviews(self, number_of_reviews):
-        reviews_modal = self.get_reviews_modal()
+    def get_reviews(self, number_of_reviews, reviews_modal):
         review_comments = []
         reviews = WebDriverWait(self.driver, 10).until(
             EC.presence_of_all_elements_located((By.XPATH, '//div[@data-testid="pdp-reviews-modal-scrollable-panel"]//div[starts-with(@class,"r1are2x1")]'))
