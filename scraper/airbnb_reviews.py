@@ -4,6 +4,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from datetime import date, timedelta
+
 class AirbnbReview():
     def __init__(self, driver: WebDriver) -> None:
         self.driver = driver
@@ -76,7 +77,7 @@ class AirbnbReview():
             EC.presence_of_all_elements_located((By.XPATH, '//div[@data-testid="pdp-reviews-modal-scrollable-panel"]//div[starts-with(@class,"r1are2x1")]'))
         )
         # Get total number of reviews
-        while len(reviews) < int(number_of_reviews):
+        while len(reviews) < int(number_of_reviews): 
             self.driver.execute_script("arguments[0].scrollIntoView();", reviews[-1])
             reviews = reviews_modal.find_elements(by=By.XPATH, value='//div[@data-testid="pdp-reviews-modal-scrollable-panel"]//div[starts-with(@class,"r1are2x1")]')
             

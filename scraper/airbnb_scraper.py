@@ -1,13 +1,14 @@
+from __future__ import annotations
 from types import *
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 import scraper.constants as const
 from selenium.webdriver.common.by import By
-import time
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from scraper.airbnb_room import AirbnbRoom
+
 class Airbnb(webdriver.Chrome):
     def __init__(self, options: Options = None, service: Service = None, keep_alive: bool = True, teardown = False) -> None:
         super().__init__(options, service, keep_alive)
@@ -97,5 +98,6 @@ class Airbnb(webdriver.Chrome):
     
     def get_room_info(self):
         rooms = AirbnbRoom(driver=self)
+        return rooms.room_detail_df, rooms.room_reviews_df, rooms.host_detail_df
             
             
