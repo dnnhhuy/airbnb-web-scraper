@@ -49,7 +49,7 @@ if __name__ == '__main__':
     options.add_argument("--headless")
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
-    with Airbnb(options=options, teardown=False) as bot:
+    with Airbnb(options=options, teardown=True) as bot:
         bot.load_main_page()
         bot.select_destination("Da Lat")
         bot.select_dates((date.today() + timedelta(days=3)).strftime("%m/%d/%Y"), (date.today() + timedelta(days=5)).strftime("%m/%d/%Y"))

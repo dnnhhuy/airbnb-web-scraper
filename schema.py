@@ -11,7 +11,10 @@ schema = {
         StructField('host_number_of_reviews', IntegerType(), True),
         StructField('hosting_time', StringType(), True),
         StructField('host_picture_url', StringType(), True),
-        StructField('host_identity_verified', BooleanType(), True)
+        StructField('host_identity_verified', BooleanType(), True),
+        StructField('host_response_time', StringType(), True),
+        StructField('host_response_rate', StringType(), True),
+        StructField('host_since', StringType(), True)
     ]),
     'room_detail': StructType([
         StructField('room_id', LongType(), False),

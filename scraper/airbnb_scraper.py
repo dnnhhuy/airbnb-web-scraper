@@ -9,6 +9,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from scraper.airbnb_room import AirbnbRoom
 from delta import *
+from schema import *
 
 class Airbnb(webdriver.Chrome):
     def __init__(self, options: Options = None, service: Service = None, keep_alive: bool = True, teardown = False) -> None:
@@ -111,8 +112,11 @@ class Airbnb(webdriver.Chrome):
             room_detail_df.iteritems = room_detail_df.items
             room_detail_df = spark.createDataFrame(room_detail_df)
             
-            room_reviews_df.iteritems = room_reviews_df.items
-            room_reviews_df = spark.createDataFrame(room_reviews_df)
+            if len(room_reviews_df) > 0:
+                room_reviews_df.iteritems = room_reviews_df.items
+                room_reviews_df = spark.createDataFrame(room_reviews_df)
+            else:
+                room_reviews_df = spark.createDataFrame(data=[], schema=schema['room_reviews'])
             
             host_detail_df.iteritems = host_detail_df.items
             host_detail_df = spark.createDataFrame(host_detail_df)

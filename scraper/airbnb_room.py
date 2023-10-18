@@ -7,8 +7,7 @@ from scraper.utils import *
 from scraper.airbnb_reviews import AirbnbReview
 from scraper.airbnb_host import AirbnbHost
 import pandas as pd
-from delta import *
-from delta.pip_utils import configure_spark_with_delta_pip
+
 pd.set_option('display.max_columns', None)
 
 class AirbnbRoom():
@@ -27,7 +26,9 @@ class AirbnbRoom():
             items = self.driver.find_elements(by=By.CSS_SELECTOR, value='div[itemprop="itemListElement"]')
             for item in items:
                 listing_url = item.find_element(by=By.CSS_SELECTOR, value='meta[itemprop="url"]').get_attribute('content')
+                listing_url = listing_url.split('?')[0]
                 picture_url = item.find_element(by=By.CSS_SELECTOR, value='div[role="presentation"]').find_element(by=By.TAG_NAME, value='img').get_attribute('src')
+                
                 collections.append([listing_url, picture_url])
             try:
                 next_btn = self.driver.find_element(by=By.CSS_SELECTOR, value='a[aria-label="Next"]')
@@ -51,7 +52,7 @@ class AirbnbRoom():
     def get_amenities(self):
         amenities = [] 
         show_all_btn = WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable((By.XPATH, '//button[contains(text(), "Show all")]'))
+            EC.element_to_be_clickable((By.XPATH, '//div[@data-section-id="AMENITIES_DEFAULT"]//button[contains(text(), "Show all")]'))
         )
         show_all_btn.click()
         time.sleep(2)
@@ -80,7 +81,7 @@ class AirbnbRoom():
             close_btn.click()
         except:
             print('There is no notification to close')
-        room_id = url.split('/')[2].split('?')[0]
+        room_id = url.split('/')[-1]
         name = self.driver.find_element(by=By.TAG_NAME, value='h1').get_attribute('innerText')
         description = self.get_room_description()
         try:
@@ -105,7 +106,7 @@ class AirbnbRoom():
         amenities = self.get_amenities()
         price = self.driver.find_element(by=By.XPATH, value='//*[contains(text(), "per night")]').get_attribute('innerHTML').strip()
         review_score_rating, number_of_reviews, review_score_cleanliness, review_score_communication, review_score_checkin, review_score_accuracy, review_score_location, review_score_value, review_comments = self.get_room_review()
-        host_id, host_url, host_name, host_about, host_is_superhost, host_listings_count, host_review_score, host_number_of_reviews, hosting_time, host_picture_url, host_identity_verified = self.get_host_info()
+        host_id, host_url, host_name, host_about, host_is_superhost, host_listings_count, host_review_score, host_number_of_reviews, hosting_time, host_picture_url, host_identity_verified, host_response_time, host_response_rate, host_since = self.get_host_info()
         
         room_detail_df = pd.DataFrame(data=[[room_id, host_id, picture_url, name, description, accommodates, bedrooms, beds, bathrooms, amenities, price, review_score_rating, number_of_reviews, review_score_cleanliness, review_score_communication, review_score_checkin, review_score_accuracy, review_score_location, review_score_value]], columns=['room_id', 'host_id', 'picture_url', 'name', 'description', 'accommodates', 'bedrooms', 'beds', 'bathrooms', 'amenities', 'price', 'review_score_rating', 'number_of_reviews', 'review_score_cleanliness', 'review_score_communication', 'review_score_checkin', 'review_score_accuracy', 'review_score_location', 'review_score_value'])
         
@@ -113,7 +114,7 @@ class AirbnbRoom():
         room_reviews_df['room_id'] = room_id
         room_reviews_df = room_reviews_df[['reviewer_id', 'room_id', 'reviewer_name', 'review_date', 'comment']]
 
-        host_detail_df = pd.DataFrame(data=[[host_id, host_url, host_name, host_about, host_is_superhost, host_listings_count, host_review_score, host_number_of_reviews, hosting_time, host_picture_url, host_identity_verified]], columns=['host_id', 'host_url', 'host_name', 'host_about', 'host_is_superhost', 'host_listings_count', 'host_review_score', 'host_number_of_reviews', 'hosting_time', 'host_picture_url', 'host_identity_verified'])
+        host_detail_df = pd.DataFrame(data=[[host_id, host_url, host_name, host_about, host_is_superhost, host_listings_count, host_review_score, host_number_of_reviews, hosting_time, host_picture_url, host_identity_verified, host_response_time, host_response_rate, host_since]], columns=['host_id', 'host_url', 'host_name', 'host_about', 'host_is_superhost', 'host_listings_count', 'host_review_score', 'host_number_of_reviews', 'hosting_time', 'host_picture_url', 'host_identity_verified', 'host_response_time', 'host_response_rate', 'host_since'])
         
         self.driver.close()
         self.driver.switch_to.window(self.driver.window_handles[0])
@@ -164,17 +165,23 @@ class AirbnbRoom():
                         
     
     def get_host_info(self):
+        host_response_time = ''
+        host_response_rate = ''
+        host_since = ''
         try:
             host_section = self.driver.find_element(by=By.CSS_SELECTOR, value='div[data-section-id="HOST_PROFILE_DEFAULT"]')
             try:
                 host_response_time = host_section.find_element(by=By.XPATH, value='//*[text()="Response time"]').get_attribute('innerText')
             except:
-                host_response_time = ''
+                print('There is no host reponse time')
             try:
                 host_response_rate = host_section.find_element(by=By.XPATH, value='//*[text()="Response rate"]').get_attribute('innerText')
             except:
-                host_response_rate = ''
-            host_since = host_section.find_element(by=By.CSS_SELECTOR, value='div[class^="s9fngse"]').get_attribute('innerText')
+                print('There is no host reponse rate')
+            try:
+                host_since = host_section.find_element(by=By.CSS_SELECTOR, value='div[class^="s9fngse"]').get_attribute('innerText')
+            except:
+                print('There is no host since')
         except:
             host_section = self.driver.find_element(by=By.CSS_SELECTOR, value='div[data-section-id="MEET_YOUR_HOST"]')
             
@@ -197,7 +204,7 @@ class AirbnbRoom():
         
         self.driver.close()
         self.driver.switch_to.window(self.driver.window_handles[1])
-        return host_id, host_url, host_name, host_about, host_is_superhost, host_listings_count, host_review_score, host_number_of_reviews, hosting_time, host_picture_url, host_identity_verified
+        return host_id, host_url, host_name, host_about, host_is_superhost, host_listings_count, host_review_score, host_number_of_reviews, hosting_time, host_picture_url, host_identity_verified, host_response_time, host_response_rate, host_since
        
         
 
