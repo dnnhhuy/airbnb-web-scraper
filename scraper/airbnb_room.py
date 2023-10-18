@@ -82,7 +82,7 @@ class AirbnbRoom():
         except:
             print('There is no notification to close')
         room_id = url.split('/')[-1]
-        name = self.driver.find_element(by=By.TAG_NAME, value='h1').get_attribute('innerText')
+        name = self.driver.find_element(by=By.XPATH, value='//div[@data-section-id="TITLE_DEFAULT"]//h1').get_attribute('innerText')
         description = self.get_room_description()
         try:
             overview_section = self.driver.find_element(by=By.XPATH, value='//div[contains(@data-section-id, "OVERVIEW_DEFAULT")]')

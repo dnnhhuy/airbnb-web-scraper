@@ -107,39 +107,40 @@ class Airbnb(webdriver.Chrome):
         
         for listing_url, picture_url in rooms.rooms_list:
             print(listing_url)
-            room_detail_df, room_reviews_df, host_detail_df = rooms.get_room_detail(listing_url, picture_url)
-            
-            room_detail_df.iteritems = room_detail_df.items
-            room_detail_df = spark.createDataFrame(room_detail_df)
-            
-            if len(room_reviews_df) > 0:
-                room_reviews_df.iteritems = room_reviews_df.items
-                room_reviews_df = spark.createDataFrame(room_reviews_df)
-            else:
-                room_reviews_df = spark.createDataFrame(data=[], schema=schema['room_reviews'])
-            
-            host_detail_df.iteritems = host_detail_df.items
-            host_detail_df = spark.createDataFrame(host_detail_df)
-            
-            room_detail_delta_table.alias('oldTable') \
-                .merge(room_detail_df.alias('newTable'), 'oldTable.room_id = newTable.room_id') \
-                .whenMatchedUpdateAll() \
-                .whenNotMatchedInsertAll() \
-                .execute()
-                    
-            
-            room_reviews_delta_table.alias('oldTable') \
-                .merge(room_reviews_df.alias('newTable'), 'oldTable.reviewer_id = newTable.reviewer_id AND oldTable.room_id = newTable.room_id AND oldTable.review_date = newTable.review_date AND oldTable.comment = newTable.comment') \
-                .whenMatchedUpdateAll() \
-                .whenNotMatchedInsertAll() \
-                .execute() \
-            
-            host_detail_delta_table.alias('oldTable') \
-                .merge(host_detail_df.alias('newTable'), 'oldTable.host_id = newTable.host_id') \
-                .whenMatchedUpdateAll() \
-                .whenNotMatchedInsertAll() \
-                .execute() \
+            try:
+                room_detail_df, room_reviews_df, host_detail_df = rooms.get_room_detail(listing_url, picture_url)
+                print("Finish Scraping! Saving data to delta table...")
                 
-        return None
-        
+                room_detail_df.iteritems = room_detail_df.items
+                room_detail_df = spark.createDataFrame(room_detail_df)
+                
+                if len(room_reviews_df) > 0:
+                    room_reviews_df.iteritems = room_reviews_df.items
+                    room_reviews_df = spark.createDataFrame(room_reviews_df)
+                else:
+                    room_reviews_df = spark.createDataFrame(data=[], schema=schema['room_reviews'])
+                
+                host_detail_df.iteritems = host_detail_df.items
+                host_detail_df = spark.createDataFrame(host_detail_df)
+                
+                room_detail_delta_table.alias('oldTable') \
+                    .merge(room_detail_df.alias('newTable'), 'oldTable.room_id = newTable.room_id') \
+                    .whenMatchedUpdateAll() \
+                    .whenNotMatchedInsertAll() \
+                    .execute()
+                        
+                room_reviews_delta_table.alias('oldTable') \
+                    .merge(room_reviews_df.alias('newTable'), 'oldTable.reviewer_id = newTable.reviewer_id AND oldTable.room_id = newTable.room_id AND oldTable.review_date = newTable.review_date AND oldTable.comment = newTable.comment') \
+                    .whenMatchedUpdateAll() \
+                    .whenNotMatchedInsertAll() \
+                    .execute()
+                
+                host_detail_delta_table.alias('oldTable') \
+                    .merge(host_detail_df.alias('newTable'), 'oldTable.host_id = newTable.host_id') \
+                    .whenMatchedUpdateAll() \
+                    .whenNotMatchedInsertAll() \
+                    .execute()
+            except:
+                print('Error when scraping this page')
+                continue
             
