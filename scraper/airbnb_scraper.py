@@ -129,7 +129,7 @@ class Airbnb(webdriver.Chrome):
                     
             
             room_reviews_delta_table.alias('oldTable') \
-                .merge(room_reviews_df.alias('newTable'), 'oldTable.reviewer_id = newTable.reviewer_id AND oldTable.room_id = newTable.room_id') \
+                .merge(room_reviews_df.alias('newTable'), 'oldTable.reviewer_id = newTable.reviewer_id AND oldTable.room_id = newTable.room_id AND oldTable.review_date = newTable.review_date AND oldTable.comment = newTable.comment') \
                 .whenMatchedUpdateAll() \
                 .whenNotMatchedInsertAll() \
                 .execute() \

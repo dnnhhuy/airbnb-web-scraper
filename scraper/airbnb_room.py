@@ -113,7 +113,7 @@ class AirbnbRoom():
         room_reviews_df = pd.DataFrame(data=review_comments, columns=['reviewer_id', 'reviewer_name', 'review_date', 'comment'])
         room_reviews_df['room_id'] = room_id
         room_reviews_df = room_reviews_df[['reviewer_id', 'room_id', 'reviewer_name', 'review_date', 'comment']]
-
+        
         host_detail_df = pd.DataFrame(data=[[host_id, host_url, host_name, host_about, host_is_superhost, host_listings_count, host_review_score, host_number_of_reviews, hosting_time, host_picture_url, host_identity_verified, host_response_time, host_response_rate, host_since]], columns=['host_id', 'host_url', 'host_name', 'host_about', 'host_is_superhost', 'host_listings_count', 'host_review_score', 'host_number_of_reviews', 'hosting_time', 'host_picture_url', 'host_identity_verified', 'host_response_time', 'host_response_rate', 'host_since'])
         
         self.driver.close()
