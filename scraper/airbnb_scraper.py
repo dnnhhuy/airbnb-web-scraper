@@ -8,6 +8,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from scraper.airbnb_room import AirbnbRoom
+from delta import *
 
 class Airbnb(webdriver.Chrome):
     def __init__(self, options: Options = None, service: Service = None, keep_alive: bool = True, teardown = False) -> None:
@@ -99,22 +100,42 @@ class Airbnb(webdriver.Chrome):
     def get_rooms_info(self, spark=None):
         rooms = AirbnbRoom(driver=self)
         # room_detail_df, room_reviews_df, host_detail_df = rooms.get_room_detail('www.airbnb.com/rooms/654718042713876549?check_in=2023-10-21&check_out=2023-10-23&source_impression_id=p3_1697615793_Z24hCAImdE7MFu%2Bv&previous_page_section_name=1000', '')
+        room_detail_delta_table = DeltaTable.forPath(spark, 'hdfs://namenode:9000/spark-warehouse/room_detail')
+        room_reviews_delta_table = DeltaTable.forPath(spark, 'hdfs://namenode:9000/spark-warehouse/room_reviews')
+        host_detail_delta_table = DeltaTable.forPath(spark, 'hdfs://namenode:9000/spark-warehouse/host_detail')
+        
         for listing_url, picture_url in rooms.rooms_list:
             print(listing_url)
             room_detail_df, room_reviews_df, host_detail_df = rooms.get_room_detail(listing_url, picture_url)
             
-            # room_detail_df.iteritems = room_detail_df.items
-            # room_detail_df = spark.createDataFrame(room_detail_df)
+            room_detail_df.iteritems = room_detail_df.items
+            room_detail_df = spark.createDataFrame(room_detail_df)
             
-            # room_reviews_df.iteritems = room_reviews_df.items
-            # room_reviews_df = spark.createDataFrame(room_reviews_df)
+            room_reviews_df.iteritems = room_reviews_df.items
+            room_reviews_df = spark.createDataFrame(room_reviews_df)
             
-            # host_detail_df.iteritems = host_detail_df.items
-            # host_detail_df = spark.createDataFrame(host_detail_df)
+            host_detail_df.iteritems = host_detail_df.items
+            host_detail_df = spark.createDataFrame(host_detail_df)
             
-            room_detail_df.head(5)
-            room_reviews_df.head(5)
-            host_detail_df.head(5)
+            room_detail_delta_table.alias('oldTable') \
+                .merge(room_detail_df.alias('newTable'), 'oldTable.room_id = newTable.room_id') \
+                .whenMatchedUpdateAll() \
+                .whenNotMatchedInsertAll() \
+                .execute()
+                    
+            
+            room_reviews_delta_table.alias('oldTable') \
+                .merge(room_reviews_df.alias('newTable'), 'oldTable.reviewer_id = newTable.reviewer_id AND oldTable.room_id = newTable.room_id') \
+                .whenMatchedUpdateAll() \
+                .whenNotMatchedInsertAll() \
+                .execute() \
+            
+            host_detail_delta_table.alias('oldTable') \
+                .merge(host_detail_df.alias('newTable'), 'oldTable.host_id = newTable.host_id') \
+                .whenMatchedUpdateAll() \
+                .whenNotMatchedInsertAll() \
+                .execute() \
+                
         return None
-            
+        
             

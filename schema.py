@@ -27,7 +27,7 @@ schema = {
         StructField('price', StringType(), True),
         StructField('review_score_rating', StringType(), True),
         StructField('number_of_reviews', StringType(), True),
-        StructField('review_score_clealiness', StringType(), True),
+        StructField('review_score_cleanliness', StringType(), True),
         StructField('review_score_communication', StringType(), True),
         StructField('review_score_checkin',StringType(), True),
         StructField('review_score_location', StringType(), True),
@@ -36,7 +36,7 @@ schema = {
     'room_reviews': StructType([
         StructField('reviewer_id', LongType(), False),
         StructField('room_id', LongType(), False),
-        StructField('rerviewer_name', StringType(), True),
+        StructField('reviewer_name', StringType(), True),
         StructField('review_date', StringType(), True),
         StructField('comment', StringType(), True)
     ])

@@ -103,7 +103,6 @@ class AirbnbRoom():
             if 'bathroom' in overview:
                 bathrooms = overview      
         amenities = self.get_amenities()
-        print(amenities)
         price = self.driver.find_element(by=By.XPATH, value='//*[contains(text(), "per night")]').get_attribute('innerHTML').strip()
         review_score_rating, number_of_reviews, review_score_cleanliness, review_score_communication, review_score_checkin, review_score_accuracy, review_score_location, review_score_value, review_comments = self.get_room_review()
         host_id, host_url, host_name, host_about, host_is_superhost, host_listings_count, host_review_score, host_number_of_reviews, hosting_time, host_picture_url, host_identity_verified = self.get_host_info()
