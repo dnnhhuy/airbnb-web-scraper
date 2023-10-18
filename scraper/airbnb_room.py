@@ -14,8 +14,7 @@ pd.set_option('display.max_columns', None)
 class AirbnbRoom():
     def __init__(self, driver: WebDriver) -> None:
         self.driver = driver
-        # self.rooms_list = self.get_rooms_list()
-        self.room_detail_df, self.room_reviews_df, self.host_detail_df = self.get_room_detail('www.airbnb.com/rooms/41090507?adults=2&check_in=2023-10-19&check_out=2023-10-21&source_impression_id=p3_1697429985_KuEbik4FKy367vMH&previous_page_section_name=1000')
+        self.rooms_list = self.get_rooms_list()
         
     def get_rooms_list(self):
         collections = []
@@ -29,9 +28,7 @@ class AirbnbRoom():
             for item in items:
                 listing_url = item.find_element(by=By.CSS_SELECTOR, value='meta[itemprop="url"]').get_attribute('content')
                 picture_url = item.find_element(by=By.CSS_SELECTOR, value='div[role="presentation"]').find_element(by=By.TAG_NAME, value='img').get_attribute('src')
-                print(listing_url)
-                room_detail_df, room_reviews_df, host_detail_df = self.get_room_detail(listing_url)
-                collections.append()
+                collections.append([listing_url, picture_url])
             try:
                 next_btn = self.driver.find_element(by=By.CSS_SELECTOR, value='a[aria-label="Next"]')
                 next_btn.click()
@@ -57,8 +54,10 @@ class AirbnbRoom():
             EC.element_to_be_clickable((By.XPATH, '//button[contains(text(), "Show all")]'))
         )
         show_all_btn.click()
+        time.sleep(2)
+        
         amenities_elements = WebDriverWait(self.driver, 10).until(
-            EC.visibility_of_all_elements_located((By.CSS_SELECTOR, 'div[class^="twad414"]'))
+            EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'div[class^="twad414"]'))
         )
         for amenity in amenities_elements:
             if 'Unavailable' not in amenity.get_attribute('innerText'):
@@ -67,14 +66,14 @@ class AirbnbRoom():
         close_btn.click()
         return amenities
     
-    def get_room_detail(self, url):
+    def get_room_detail(self, url, picture_url):
         listing_url = 'https://' + url
         self.driver.execute_script("window.open('');")
         self.driver.switch_to.window(self.driver.window_handles[1])
         self.driver.get(url=listing_url)
             
         try:
-            WebDriverWait(self.driver, 10).until(
+            WebDriverWait(self.driver, 5).until(
                 EC.visibility_of_element_located((By.CSS_SELECTOR, 'div[aria-label="Translation on"]'))
             )
             close_btn = self.driver.find_element(By.XPATH, '//div[@aria-label="Translation on"][@role="dialog"]//button[@aria-label="Close"]')
@@ -104,11 +103,12 @@ class AirbnbRoom():
             if 'bathroom' in overview:
                 bathrooms = overview      
         amenities = self.get_amenities()
+        print(amenities)
         price = self.driver.find_element(by=By.XPATH, value='//*[contains(text(), "per night")]').get_attribute('innerHTML').strip()
         review_score_rating, number_of_reviews, review_score_cleanliness, review_score_communication, review_score_checkin, review_score_accuracy, review_score_location, review_score_value, review_comments = self.get_room_review()
         host_id, host_url, host_name, host_about, host_is_superhost, host_listings_count, host_review_score, host_number_of_reviews, hosting_time, host_picture_url, host_identity_verified = self.get_host_info()
         
-        room_detail_df = pd.DataFrame(data=[[room_id, host_id, name, description, accommodates, bedrooms, beds, bathrooms, amenities, price, review_score_rating, number_of_reviews, review_score_cleanliness, review_score_communication, review_score_checkin, review_score_accuracy, review_score_location, review_score_value]], columns=['room_id', 'host_id', 'name', 'description', 'accommodates', 'bedrooms', 'beds', 'bathrooms', 'amenities', 'price', 'review_score_rating', 'number_of_reviews', 'review_score_cleanliness', 'review_score_communication', 'review_score_checkin', 'review_score_accuracy', 'review_score_location', 'review_score_value'])
+        room_detail_df = pd.DataFrame(data=[[room_id, host_id, picture_url, name, description, accommodates, bedrooms, beds, bathrooms, amenities, price, review_score_rating, number_of_reviews, review_score_cleanliness, review_score_communication, review_score_checkin, review_score_accuracy, review_score_location, review_score_value]], columns=['room_id', 'host_id', 'picture_url', 'name', 'description', 'accommodates', 'bedrooms', 'beds', 'bathrooms', 'amenities', 'price', 'review_score_rating', 'number_of_reviews', 'review_score_cleanliness', 'review_score_communication', 'review_score_checkin', 'review_score_accuracy', 'review_score_location', 'review_score_value'])
         
         room_reviews_df = pd.DataFrame(data=review_comments, columns=['reviewer_id', 'reviewer_name', 'review_date', 'comment'])
         room_reviews_df['room_id'] = room_id
@@ -117,9 +117,7 @@ class AirbnbRoom():
         host_detail_df = pd.DataFrame(data=[[host_id, host_url, host_name, host_about, host_is_superhost, host_listings_count, host_review_score, host_number_of_reviews, hosting_time, host_picture_url, host_identity_verified]], columns=['host_id', 'host_url', 'host_name', 'host_about', 'host_is_superhost', 'host_listings_count', 'host_review_score', 'host_number_of_reviews', 'hosting_time', 'host_picture_url', 'host_identity_verified'])
         
         self.driver.close()
-        self.driver.switch_to.window(self.driver.window_handles[1])
-        # self.driver.close()
-        # self.driver.switch_to.window(self.driver.window_handles[0])
+        self.driver.switch_to.window(self.driver.window_handles[0])
         return room_detail_df, room_reviews_df, host_detail_df
     
     def get_room_review(self):
@@ -133,12 +131,12 @@ class AirbnbRoom():
         review_score_value = ''
         review_comments = []
         
-        # try:
-        review_section = self.driver.find_element(by=By.XPATH, value='//div[@data-section-id="REVIEWS_DEFAULT"]')
-        review_stats = review_section.find_element(by=By.TAG_NAME, value="h2").get_attribute('innerText').split('\n')[1]
-        # except:
-        #     review_section = self.driver.find_element(by=By.XPATH, value='//div[@data-section-id="REVIEWS_EMPTY_DEFAULT"]')
-        #     review_stats = review_section.find_element(by=By.TAG_NAME, value="h2").get_attribute('innerText')
+        try:
+            review_section = self.driver.find_element(by=By.XPATH, value='//div[@data-section-id="REVIEWS_DEFAULT"]')
+            review_stats = review_section.find_element(by=By.TAG_NAME, value="h2").get_attribute('innerText').split('\n')[1]
+        except:
+            review_section = self.driver.find_element(by=By.XPATH, value='//div[@data-section-id="REVIEWS_EMPTY_DEFAULT"]')
+            review_stats = review_section.find_element(by=By.TAG_NAME, value="h2").get_attribute('innerText')
         
         if 'No reviews' in review_stats:
             print("There is no review yet")
@@ -156,7 +154,7 @@ class AirbnbRoom():
                 review_show_all_btn.click()
                 reviews_modal = reviews.get_reviews_modal()
                 review_score_cleanliness, review_score_communication, review_score_checkin, review_score_accuracy, review_score_location, review_score_value = reviews.get_review_score(reviews_modal)
-                review_comments = reviews.get_reviews(number_of_reviews, reviews_modal)
+                review_comments = reviews.get_reviews(reviews_modal)
                 reviews.close_reviews_modal(reviews_modal)
             except:
                 review_score_cleanliness, review_score_communication, review_score_checkin, review_score_accuracy, review_score_location, review_score_value = reviews.get_review_score_without_modal(review_section)
@@ -196,7 +194,10 @@ class AirbnbRoom():
         host_number_of_reviews = host_detail.get_host_number_of_reviews()
         hosting_time = host_detail.get_hosting_time()
         host_picture_url = host_detail.get_host_picture_url()
-        host_identity_verified = host_detail.check_host_identity_verified()    
+        host_identity_verified = host_detail.check_host_identity_verified()   
+        
+        self.driver.close()
+        self.driver.switch_to.window(self.driver.window_handles[1])
         return host_id, host_url, host_name, host_about, host_is_superhost, host_listings_count, host_review_score, host_number_of_reviews, hosting_time, host_picture_url, host_identity_verified
        
         

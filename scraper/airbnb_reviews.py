@@ -4,6 +4,8 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from datetime import date, timedelta
+import time
+from selenium.webdriver.common.keys import Keys
 
 class AirbnbReview():
     def __init__(self, driver: WebDriver) -> None:
@@ -71,16 +73,46 @@ class AirbnbReview():
                 print("This is no sub review scores")
         return review_score_cleanliness, review_score_communication, review_score_checkin, review_score_accuracy, review_score_location, review_score_value
     
-    def get_reviews(self, number_of_reviews, reviews_modal: WebElement):
+    def scroll_down(self):
+        """A method for scrolling the page."""
+
+        # Get scroll height.
+        last_height = self.driver.execute_script("return document.body.scrollHeight")
+
+        while True:
+
+            # Scroll down to the bottom.
+            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
+            # Wait to load the page.
+            time.sleep(2)
+
+            # Calculate new scroll height and compare with last scroll height.
+            new_height = self.driver.execute_script("return document.body.scrollHeight")
+
+            if new_height == last_height:
+
+                break
+
+            last_height = new_height
+            
+    def get_reviews(self, reviews_modal: WebElement):
         review_comments = []
         reviews = WebDriverWait(self.driver, 10).until(
             EC.presence_of_all_elements_located((By.XPATH, '//div[@data-testid="pdp-reviews-modal-scrollable-panel"]//div[starts-with(@class,"r1are2x1")]'))
         )
-        # Get total number of reviews
-        while len(reviews) < int(number_of_reviews): 
+        
+        # Scroll to the end of review page
+        while True: 
             self.driver.execute_script("arguments[0].scrollIntoView();", reviews[-1])
-            reviews = reviews_modal.find_elements(by=By.XPATH, value='//div[@data-testid="pdp-reviews-modal-scrollable-panel"]//div[starts-with(@class,"r1are2x1")]')
-            
+            time.sleep(1)
+            new_reviews = reviews_modal.find_elements(by=By.XPATH, value='//div[@data-testid="pdp-reviews-modal-scrollable-panel"]//div[starts-with(@class,"r1are2x1")]')
+            if len(new_reviews) > len(reviews):
+                reviews = new_reviews
+            else:
+                break
+                
+        reviews = reviews_modal.find_elements(by=By.XPATH, value='//div[@data-testid="pdp-reviews-modal-scrollable-panel"]//div[starts-with(@class,"r1are2x1")]')
         for review in reviews:
             reviewer_id = review.find_element(by=By.CSS_SELECTOR, value='a[class^="_9bezani"]').get_attribute('href').split('/')[-1]
             reviewer_name = review.find_element(by=By.CSS_SELECTOR, value='h3[class^="hpipapi"]').get_attribute('innerText')

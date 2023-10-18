@@ -24,7 +24,7 @@ class Airbnb(webdriver.Chrome):
         
     def select_destination(self, destination):
         try:
-            anywhere_btn = WebDriverWait(self, 10).until(
+            anywhere_btn = WebDriverWait(self, 5).until(
                 EC.visibility_of_element_located((By.XPATH, '//*[text()="Anywhere"]'))
             )
             anywhere_btn.click()
@@ -96,8 +96,25 @@ class Airbnb(webdriver.Chrome):
         search_btn = self.find_element(by=By.CSS_SELECTOR, value='button[data-testid="structured-search-input-search-button"]')
         search_btn.click()
     
-    def get_room_info(self):
+    def get_rooms_info(self, spark=None):
         rooms = AirbnbRoom(driver=self)
-        return rooms.room_detail_df, rooms.room_reviews_df, rooms.host_detail_df
+        # room_detail_df, room_reviews_df, host_detail_df = rooms.get_room_detail('www.airbnb.com/rooms/654718042713876549?check_in=2023-10-21&check_out=2023-10-23&source_impression_id=p3_1697615793_Z24hCAImdE7MFu%2Bv&previous_page_section_name=1000', '')
+        for listing_url, picture_url in rooms.rooms_list:
+            print(listing_url)
+            room_detail_df, room_reviews_df, host_detail_df = rooms.get_room_detail(listing_url, picture_url)
+            
+            # room_detail_df.iteritems = room_detail_df.items
+            # room_detail_df = spark.createDataFrame(room_detail_df)
+            
+            # room_reviews_df.iteritems = room_reviews_df.items
+            # room_reviews_df = spark.createDataFrame(room_reviews_df)
+            
+            # host_detail_df.iteritems = host_detail_df.items
+            # host_detail_df = spark.createDataFrame(host_detail_df)
+            
+            room_detail_df.head(5)
+            room_reviews_df.head(5)
+            host_detail_df.head(5)
+        return None
             
             

@@ -16,6 +16,7 @@ schema = {
     'room_detail': StructType([
         StructField('room_id', LongType(), False),
         StructField('host_id', LongType(), False),
+        StructField('picture_url', StringType(), True),
         StructField('name', StringType(), True),
         StructField('description', StringType(), True),
         StructField('accommodates', StringType(), True),
