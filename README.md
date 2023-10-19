@@ -22,7 +22,7 @@ Demo for scraping data task:
 ![demo](images/ezgif.com-video-to-gif.gif)
 
 ## ER Diagram
-The data scraped will have ER Diagram as below:
+The scraped data will have ER Diagram as below:
 
 ![er diagram](images/ER%20Diagram.jpg)
 
@@ -32,7 +32,7 @@ Schema tables results:
 ![schema](images/Schema%20Diagram.jpg)
 
 ## Data Example
-Examples of data scraped data:
+Examples of data scraped from airbnb:
 room_reviews:
 
 ![example1](images/reviews.png)
