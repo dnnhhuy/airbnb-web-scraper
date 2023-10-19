@@ -1,0 +1,1 @@
+docker exec -it scraper python3 main.py
