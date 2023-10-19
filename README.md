@@ -3,11 +3,11 @@
 This project scrapes data from Airbnb Website and stores data in data lake house hosted by HDFS. The code will walkthrough all of listing rooms which are searching's results and scrape all of information available on the room's page (e.g room name, room description, price, review scores, etc.)
 
 ## Tools & Technology
-- [Selenium](https://www.selenium.dev/): is an open-source browser automation tools and libraries mainly used for scraping in this project.
-- [Apache Spark](https://spark.apache.org/): distributed processing system used for transform and load data to data lakehouse
-- [Apache Hadoop](https://hadoop.apache.org/): distributed storage system to store delta table
-- [Delta Lake](https://delta.io/): open-source storage layer run on top of HDFS in this project to create transaction log for parquet data.
-- [Docker](https://www.docker.com/): used for containerizing application
+- [Selenium](https://www.selenium.dev/) - is an open-source browser automation tools and libraries mainly used for scraping in this project.
+- [Apache Spark](https://spark.apache.org/) - distributed processing system used for transform and load data to data lakehouse
+- [Apache Hadoop](https://hadoop.apache.org/) - distributed storage system to store delta table
+- [Delta Lake](https://delta.io/) - open-source storage layer run on top of HDFS in this project to create transaction log for parquet data.
+- [Docker](https://www.docker.com/) - used for containerizing application
 
 ## Workflow
 The project's workflow described as below:
