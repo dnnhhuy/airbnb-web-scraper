@@ -14,7 +14,7 @@ The project's workflow described as below:
 
 ![workflow](images/Selenium%20Workflow.jpg)
 
-Selenium will load the main page, input several query in the search query specified in **main.py** (You're able to modify it as your preferences). Then it click the search button. It will scraping through all of listings available on all pages of the searching's result for the room's information, host's information and all reviews of the rooms. Then Spark transform data to dataframe and store data to data lakehouse built on HDFS. Applications used in this project containerized by Docker.
+Selenium will load the main page, input several query in the search query specified in **main.py** (You're able to modify it as your preferences). Then it click the search button. It will scraping through all of listings available on all pages of the searching's result for the room's information, host's information and all reviews of the rooms. Then Spark transform data to dataframe and store data to data lakehouse built on HDFS. Applications used in this project broken down into microservices in order to be independently deployable using Docker.
 
 ## Demo
 Demo for scraping data task:
