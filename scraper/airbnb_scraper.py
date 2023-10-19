@@ -140,7 +140,8 @@ class Airbnb(webdriver.Chrome):
                     .whenMatchedUpdateAll() \
                     .whenNotMatchedInsertAll() \
                     .execute()
-            except:
+            except Exception as e:
+                print(e)
                 print('Error when scraping this page! Skipping...')
                 continue
             
