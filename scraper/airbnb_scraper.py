@@ -1,13 +1,17 @@
+from __future__ import annotations
 from types import *
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 import scraper.constants as const
 from selenium.webdriver.common.by import By
-import time
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from scraper.airbnb_room import AirbnbRoom
+from delta import *
+from schema import *
+from pyspark.sql import functions as func
+
 class Airbnb(webdriver.Chrome):
     def __init__(self, options: Options = None, service: Service = None, keep_alive: bool = True, teardown = False) -> None:
         super().__init__(options, service, keep_alive)
@@ -22,17 +26,21 @@ class Airbnb(webdriver.Chrome):
         self.get(const.BASE_URL)
         
     def select_destination(self, destination):
-        anywhere_btn = WebDriverWait(self, 10).until(
-            EC.visibility_of_element_located((By.XPATH, '//*[text()="Anywhere"]'))
-        )
-        anywhere_btn.click()
+        try:
+            anywhere_btn = WebDriverWait(self, 5).until(
+                EC.visibility_of_element_located((By.XPATH, '//*[text()="Anywhere"]'))
+            )
+            anywhere_btn.click()
+        except:
+            print("There is no anywhere button")
         
         search_field = WebDriverWait(self, 10).until(
-            EC.presence_of_element_located((By.ID, 'bigsearch-query-location-input'))
+            EC.visibility_of_element_located((By.ID, "bigsearch-query-location-input"))
         )
         search_field.send_keys(destination)
-        time.sleep(5)
-        first_result = self.find_element(by=By.ID, value="bigsearch-query-location-suggestion-0")
+        first_result = WebDriverWait(self, 10).until(
+            EC.visibility_of_element_located((By.ID, "bigsearch-query-location-suggestion-0"))
+        )
         first_result.click()
     
     ## mm/dd/yyyy
@@ -91,7 +99,52 @@ class Airbnb(webdriver.Chrome):
         search_btn = self.find_element(by=By.CSS_SELECTOR, value='button[data-testid="structured-search-input-search-button"]')
         search_btn.click()
     
-    def get_room_info(self):
+    def get_rooms_info(self, spark=None):
         rooms = AirbnbRoom(driver=self)
-            
+        # room_detail_df, room_reviews_df, host_detail_df = rooms.get_room_detail('www.airbnb.com/rooms/654718042713876549?check_in=2023-10-21&check_out=2023-10-23&source_impression_id=p3_1697615793_Z24hCAImdE7MFu%2Bv&previous_page_section_name=1000', '')
+        room_detail_delta_table = DeltaTable.forPath(spark, 'hdfs://namenode:9000/spark-warehouse/room_detail')
+        room_reviews_delta_table = DeltaTable.forPath(spark, 'hdfs://namenode:9000/spark-warehouse/room_reviews')
+        host_detail_delta_table = DeltaTable.forPath(spark, 'hdfs://namenode:9000/spark-warehouse/host_detail')
+        
+        for listing_url, picture_url in rooms.rooms_list:
+            print(listing_url)
+            try:
+                room_detail_df, room_reviews_df, host_detail_df = rooms.get_room_detail(listing_url, picture_url)
+                print("Finish Scraping! Saving data to delta table...")
+                
+                room_detail_df.iteritems = room_detail_df.items
+                room_detail_df = spark.createDataFrame(room_detail_df)
+                
+                if len(room_reviews_df) > 0:
+                    room_reviews_df.iteritems = room_reviews_df.items
+                    room_reviews_df = spark.createDataFrame(room_reviews_df) \
+                                        .withColumn('review_id', func.expr('uuid()')) \
+                                        .select('review_id', 'room_id', 'reviewer_id', 'reviewer_name', 'review_date', 'comment')
+                else:
+                    room_reviews_df = spark.createDataFrame(data=[], schema=schema['room_reviews'])
+                
+                host_detail_df.iteritems = host_detail_df.items
+                host_detail_df = spark.createDataFrame(host_detail_df)
+                
+                room_detail_delta_table.alias('oldTable') \
+                    .merge(room_detail_df.alias('newTable'), 'oldTable.room_id = newTable.room_id') \
+                    .whenMatchedUpdateAll() \
+                    .whenNotMatchedInsertAll() \
+                    .execute()
+                        
+                room_reviews_delta_table.alias('oldTable') \
+                    .merge(room_reviews_df.alias('newTable'), 'oldTable.reviewer_id = newTable.reviewer_id AND oldTable.room_id = newTable.room_id AND oldTable.review_date = newTable.review_date AND oldTable.comment = newTable.comment') \
+                    .whenMatchedUpdateAll() \
+                    .whenNotMatchedInsertAll() \
+                    .execute()
+                
+                host_detail_delta_table.alias('oldTable') \
+                    .merge(host_detail_df.alias('newTable'), 'oldTable.host_id = newTable.host_id') \
+                    .whenMatchedUpdateAll() \
+                    .whenNotMatchedInsertAll() \
+                    .execute()
+            except Exception as e:
+                print(e)
+                print('Error when scraping this page! Skipping...')
+                continue
             
