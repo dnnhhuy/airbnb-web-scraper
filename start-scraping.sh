@@ -1,1 +1,1 @@
-docker exec -it scraper python3 main.py
+docker exec -it scraper python3 /src/main.py
