@@ -101,7 +101,7 @@ class AirbnbRoom():
                 bedrooms = overview
             if 'bed' in overview:
                 beds = overview
-            if 'bathroom' in overview:
+            if 'bath' in overview:
                 bathrooms = overview      
         amenities = self.get_amenities()
         price = self.driver.find_element(by=By.XPATH, value='//*[contains(text(), "per night")]').get_attribute('innerHTML').strip()
