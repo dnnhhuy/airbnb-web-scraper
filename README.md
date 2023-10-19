@@ -27,7 +27,7 @@ The data scraped will have ER Diagram as below:
 ![er diagram](images/ER%20Diagram.jpg)
 
 ## Schema
-This is the schema described results as tables:
+Schema tables results:
 
 ![schema](images/Schema%20Diagram.jpg)
 
