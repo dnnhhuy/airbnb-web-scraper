@@ -10,6 +10,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from scraper.airbnb_room import AirbnbRoom
 from delta import *
 from schema import *
+from pyspark.sql import functions as func
 
 class Airbnb(webdriver.Chrome):
     def __init__(self, options: Options = None, service: Service = None, keep_alive: bool = True, teardown = False) -> None:
@@ -116,7 +117,9 @@ class Airbnb(webdriver.Chrome):
                 
                 if len(room_reviews_df) > 0:
                     room_reviews_df.iteritems = room_reviews_df.items
-                    room_reviews_df = spark.createDataFrame(room_reviews_df)
+                    room_reviews_df = spark.createDataFrame(room_reviews_df) \
+                                        .withColumn('review_id', func.expr('uuid()')) \
+                                        .select('review_id', 'room_id', 'reviewer_id', 'reviewer_name', 'review_date', 'comment')
                 else:
                     room_reviews_df = spark.createDataFrame(data=[], schema=schema['room_reviews'])
                 
