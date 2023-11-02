@@ -64,7 +64,7 @@ I prepared few scripts to setup and start the project automatically. In order to
     ```
     This function is downloading/buidling required images, then creating containers for services used in this project. </br>
     
-* In order to start processing streaming and batch events, use this script:
+* In order to start scraping, use this script:
     ```
     ./start-scraping.sh
     ```
